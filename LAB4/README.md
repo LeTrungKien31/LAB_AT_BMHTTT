@@ -118,13 +118,3 @@ Mục tiêu quét: `192.168.56.129` (Metasploitable 2).
 ```
 Lab4_11_ĐH_CNPM1_1150080060_LeTrungKien.docx   # Báo cáo kèm ảnh minh chứng
 README.md                                       # File này
-ket_qua.txt / ket_qua.xml / bao_cao.html / smb.txt   # Kết quả xuất từ Nmap (nếu nộp kèm)
-```
-
-## 6. Việc còn thiếu
-
-- Chụp và bổ sung `sudo nmap -sA 192.168.56.129` (ACK scan).
-- Thực hiện before/after hardening trên Windows VM hoặc dịch vụ test, điền bảng so sánh.
-- Bổ sung ảnh `ip -br addr` (Kali), `ifconfig` (Metasploitable 2) và `nmap -sn` nếu giảng viên yêu cầu đúng danh mục 8 ảnh.
-- Làm các bài tập bổ sung mục 14 nếu được yêu cầu.
-- Điền phiên bản Kali, VMware và hệ điều hành máy thật vào mục 1.
