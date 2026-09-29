@@ -1,127 +1,130 @@
-# BÁO CÁO THỰC HÀNH LAB 3
-LINK VIDEO: https://www.youtube.com/watch?v=Gjqdf3-w_Vk
-**Học phần:** Thực hành An toàn và Bảo mật Hệ thống Thông tin[cite: 3]  
-**Bài thực hành:** Lab 3 – Nhận diện và ứng phó các mối đe dọa đến an toàn thông tin[cite: 3]  
-**Họ và tên:** LÊ TRUNG KIÊN  
-**Mã số sinh viên (MSSV):** 1150080060  
-**Lớp:** 11_ĐH_CNPM1  
-**Tên tệp báo cáo:** `[11_ĐH_CNPM1]-LAB3_1150080060-LeTrungKien.docx`[cite: 3]
----
+# LAB 4 – Khảo sát và đánh giá bề mặt mạng bằng Nmap
+Link video: https://www.youtube.com/watch?v=VjQZrglVmo4
+| Thông tin | Nội dung |
+|---|---|
+| Họ tên | Lê Trung Kiên |
+| MSSV | 1150080060 |
+| Lớp | 11_ĐH_CNPM1 |
+| Môn học | An toàn hệ thống thông tin |
+| Tên lab | Lab 4 – Khảo sát và đánh giá bề mặt mạng bằng Nmap |
+| Ngày thực hiện | 29/09/2026 |
 
-## PHẦN 1. MÔI TRƯỜNG THỰC HÀNH VÀ CÁC THÔNG SỐ HỆ THỐNG
-* **Hệ điều hành máy ảo (Guest OS):** Windows 10 Pro 64-bit, Version 22H2 (OS Build 19045.3803)[cite: 11].
-* **Phần mềm ảo hóa:** VMware Workstation (RAM: 2 GB, CPU: 2 Cores, Network: Host-only)[cite: 11].
-* **Thư mục làm việc:** `C:\LAB3` | **Thư mục minh chứng:** `C:\LAB3\Evidence`[cite: 3, 11].
-* **Phiên bản các công cụ:**
-  * Python: `3.14.7`[cite: 3, 11]
-  * Wireshark / TShark: `4.6.8`[cite: 3, 11]
-  * Sysmon: `15.22`[cite: 3, 11]
-  * Autoruns: `14.3`[cite: 3, 11]
-  * Process Explorer: `17.14`[cite: 3, 11]
-* **Mốc thời gian bắt đầu (Start Time):** `2026-09-22 00:14:43 -07:00`[cite: 11].
+> **Phạm vi:** toàn bộ thao tác chỉ thực hiện trên máy ảo do chính sinh viên dựng, trong mạng Host-Only, phục vụ học tập. Không quét hệ thống bên ngoài.
 
 ---
 
-## PHẦN 2. KẾT QUẢ THỰC HIỆN CÁC TÌNH HUỐNG (TH0 – TH8)
+## 1. Phiên bản môi trường
 
-| Tình huống | Nội dung thực hiện | Bằng chứng / File log | Kết quả |
-| :--- | :--- | :--- | :---: |
-| **TH0 & TH1** | Ghi nhận Baseline hệ thống (OS, Defender, Firewall, Network, Process) và lập Risk Register phân loại 5 nguồn đe dọa.[cite: 3, 11] | `baseline_os.txt`, `baseline_defender.txt`, `baseline_firewall.txt`, `baseline_network.txt`, `baseline_processes.txt`[cite: 3, 11] | **PASS** |
-| **TH2** | Tạo chuỗi EICAR thử nghiệm, kiểm chứng tính năng Real-time Protection và Quarantine của Microsoft Defender.[cite: 3, 11] | `defender_eicar.txt`[cite: 3, 11] | **PASS** |
-| **TH3** | Bật auditpol sự kiện đăng nhập, tạo tài khoản `lab3user`. Ghi nhận Event ID 4624, 4625 và 4648 khi dùng `runas`. Đổi mật khẩu thành công.[cite: 3, 11] | `auth_events_before_rotation.txt`[cite: 3, 11] | **PASS** |
-| **TH4** | Cài đặt Sysmon 15.22 (Event 1). Tạo persistence Registry Run `LAB3_Run_Demo` và task `LAB3_Persistence_Demo`. Mở listener 8080 với Python (PID 4116).[cite: 3, 11] | `autoruns_before.csv`, `task_ran.txt`, `sysmon_persistence.txt`[cite: 3, 11] | **PASS** |
-| **TH5** | Dùng Wireshark bắt gói tin: HTTP truyền bản rõ lộ tham số `TRAINING_ONLY`; HTTPS mã hóa TLS 1.2 bảo mật toàn bộ dữ liệu.[cite: 3, 11] | Ảnh chụp màn hình Wireshark (HTTP & HTTPS)[cite: 3, 11] | **PASS** |
-| **TH6** | Kiểm thử tải cục bộ cổng 8080, phân tích tập dữ liệu DDoS TEST-NET và log `mailbomb_sample.csv` (phát hiện `bulk-sender` gửi 60 thư).[cite: 2, 3, 11] | `local_load_test.txt`, `dos_connections.txt`, `mail_sender_counts.txt`, `mail_volume.txt`[cite: 1, 2, 3] | **PASS** |
-| **TH7** | Phân tích ngoại tuyến mẫu `phishing_email.txt` (5 chỉ dấu nhận diện) và phân loại 6 kịch bản Social Engineering trong `social_engineering_cases.csv`.[cite: 3, 11] | `phishing_email.txt`, kết quả phân loại case[cite: 3, 11] | **PASS** |
-| **TH8** | Dọn dẹp persistence, dừng server 8080, xóa user `lab3user`, kiểm tra an toàn hệ thống và xuất bảng băm SHA-256 toàn bộ thư mục Evidence.[cite: 3, 11] | `autoruns_diff.txt`, `evidence_sha256.csv`[cite: 3, 11] | **PASS** |
+| Thành phần | Chi tiết | Nguồn xác định |
+|---|---|---|
+| Công cụ quét | Nmap **7.99** | Output `Starting Nmap 7.99` |
+| Máy quét | Kali Linux (VM `VM_KALI`), user `kienle`, hostname `KienLe` | Prompt terminal |
+| Máy đích | Metasploitable 2 (VM `Metasploitable2-Linux`), hostname `metasploitable` | smb-os-discovery |
+| Nền tảng ảo hóa | VMware (MAC `00:0C:29:…` và `00:50:56:…` là OUI của VMware) | Output Nmap |
+| Mạng | Host-Only, dải `192.168.56.0/24` | Lệnh `nmap … 192.168.56.0/24` |
+| Máy thật (host OS) | *(chưa ghi nhận – điền thêm nếu cần)* | – |
+| Phiên bản Kali / VMware | *(chưa ghi nhận – điền thêm nếu cần)* | – |
 
----
+### Bảng địa chỉ
 
-## PHẦN 3. TRẢ LỜI CÂU HỎI THỰC HÀNH (10 CÂU NGẮN GỌN – 3 DÒNG/CÂU)
-
-**Câu 1: Phân biệt Asset, Vulnerability, Threat, Risk và Attack**
-* Tài sản (Asset) là dữ liệu báo cáo trong `C:\LAB3\Evidence`, còn lỗ hổng (Vulnerability) là dịch vụ web HTTP chạy bản rõ không mã hóa[cite: 3, 11].
-* Mối đe dọa (Threat) là đối tượng nghe lén; rủi ro (Risk) là nguy cơ rò rỉ dữ liệu nhạy cảm làm mất tính bảo mật[cite: 3].
-* Tấn công (Attack) là hành vi dùng Wireshark bắt gói tin để trích xuất tham số `TRAINING_ONLY` từ luồng truyền mạng[cite: 3, 11].
-
-**Câu 2: Phân loại năm tình huống ở TH1**
-* Tình huống 1 là *Hành động vô ý* do người dùng bất cẩn; tình huống 2 là *Hành động cố ý* mang mục đích xâm nhập phá hoại[cite: 3].
-* Tình huống 3 thuộc nhóm *Thảm họa tự nhiên / sự cố môi trường* do mất điện diện rộng từ hạ tầng bên ngoài[cite: 3].
-* Tình huống 4 là *Lỗi kỹ thuật* do hỏng hóc phần cứng/phần mềm; tình huống 5 là *Lỗi quản lý* do thiếu giám sát chính sách[cite: 3].
-
-**Câu 3: Ý nghĩa kiểm chứng của chuỗi EICAR với Microsoft Defender**
-* EICAR chứng minh tính năng Real-time Protection của Defender đang bật và cơ chế nhận diện chữ ký hoạt động tốt[cite: 3].
-* Quá trình chặn ghi tệp và cách ly chứng minh tính năng bảo vệ tự động của hệ điều hành được kích hoạt chuẩn xác[cite: 3, 11].
-* EICAR không chứng minh được máy trạm có khả năng chống lại mọi dòng mã độc thực tế, zero-day hay fileless malware[cite: 3].
-
-**Câu 6: Trạng thái xác thực của lab3user qua Event ID 4624, 4625 và 4648**
-* Event 4648 ghi nhận khi dùng `runas`, còn Event 4624 xuất hiện khi đăng nhập thành công bằng mật khẩu ban đầu[cite: 3].
-* Event 4625 được ghi lại khi cố ý nhập sai mật khẩu để kiểm thử cơ chế phát hiện brute-force của hệ thống[cite: 3, 11].
-* Sau khi đổi mật khẩu mới, mật khẩu cũ bị từ chối (tạo Event 4625) và chỉ mật khẩu mới mới tạo được Event 4624[cite: 3].
-
-**Câu 8: Cổng 8080 đang Listen có đủ kết luận backdoor không và các bằng chứng cần đối chiếu**
-* Chưa đủ kết luận vì nhiều tiến trình hệ thống và phần mềm hợp pháp cũng mở cổng lắng nghe cục bộ[cite: 3].
-* Cần kiểm tra: đường dẫn tệp thực thi (Path) và chữ ký số (Publisher) của tiến trình qua Process Explorer[cite: 3, 11].
-* Cần đối chiếu thêm: dòng lệnh khởi chạy (Command line) và phạm vi bind chỉ ở `127.0.0.1` hay mở ra toàn mạng[cite: 3, 11].
-
-**Câu 10: So sánh DoS và DDoS qua thực tế bài lab**
-* Đoạn script tải cục bộ mô phỏng DoS từ một nguồn duy nhất trên localhost (`127.0.0.1:8080`) gây nghẽn dịch vụ[cite: 3, 11].
-* Tệp `ddos_sample.csv` thể hiện tấn công DDoS với lưu lượng phân tán đến từ hàng loạt dải IP TEST-NET khác nhau[cite: 3].
-* Không thể chặn DDoS chỉ bằng một rule IP vì kẻ tấn công liên tục đổi địa chỉ IP và tận dụng mạng botnet phân tán[cite: 3].
-
-**Câu 11: Ảnh hưởng của Mail Bombing và hai chỉ số phát hiện bất thường**
-* Mail bombing làm suy giảm tính sẵn sàng (Availability) do gây quá tải hàng đợi xử lý và cạn kiệt dung lượng hộp thư[cite: 3].
-* Chỉ số 1: Tần suất gửi thư theo nguồn (Sender Count), nhận diện kẻ gửi thư rác dồn dập (như `bulk-sender` gửi 60 thư)[cite: 2, 3].
-* Chỉ số 2: Tổng dung lượng (Sum) và dung lượng trung bình (Average) qua trường `SizeBytes` tăng đột biến trong log[cite: 1, 3].
-
-**Câu 12: Sự khác nhau giữa HTTP và HTTPS khi quan sát bằng Wireshark**
-* Lưu lượng HTTP gửi tới cổng 8080 lộ rõ toàn bộ Request URI, phương thức GET và chuỗi tham số bản rõ (Plaintext)[cite: 3, 11].
-* Lưu lượng HTTPS tới cổng 443 được mã hóa an toàn qua TLS v1.2, bảo vệ tuyệt đối nội dung dữ liệu ứng dụng[cite: 3, 11].
-* Bắt gói tin HTTPS chỉ xem được thông tin metadata (IP nguồn/đích, cổng, kích thước gói) chứ không đọc được nội dung web[cite: 3, 11].
-
-**Câu 17: Năm chỉ dấu nhận diện trong tệp phishing_email.txt**
-* Tạo cảm giác thúc ép, khẩn cấp khi đe dọa khóa tài khoản của người dùng chỉ trong vòng 15 phút[cite: 3, 11].
-* Dùng tên hiển thị giả mạo uy tín (`IT Support - Training`) và địa chỉ `Reply-To` chuyển hướng khác với địa chỉ `From`[cite: 3, 11].
-* Thúc ép nạn nhân nhấp vào liên kết ngoài để nhập thông tin đăng nhập cùng mã xác minh tài khoản[cite: 3, 11].
-
-**Câu 19: Ý nghĩa của mã băm SHA-256 đối với thư mục Evidence**
-* SHA-256 chứng minh tính toàn vẹn (Integrity), đảm bảo các tệp bằng chứng không bị thay đổi hay sửa đổi sau khi xuất[cite: 3, 11].
-* Thay đổi dù chỉ 1 ký tự trong tệp log sẽ làm giá trị hash thay đổi hoàn toàn, giúp phát hiện việc làm giả dữ liệu[cite: 3].
-* Mã băm không chứng minh được tính đúng đắn hay nguồn gốc ban đầu của dữ liệu nếu dữ liệu được ghi bị sai lệch từ đầu[cite: 3].
+| Thiết bị | IP | MAC | Vai trò |
+|---|---|---|---|
+| Kali VM | 192.168.56.128 | (không hiển thị – chính máy quét) | Máy quét |
+| Metasploitable 2 | 192.168.56.129 | 00:0C:29:5D:F0:26 (VMware) | Máy đích |
+| Dịch vụ mạng ảo | 192.168.56.254 | 00:50:56:EA:68:AC (VMware) | Nhiều khả năng là DHCP/mạng ảo của VMware, không phải VM của sinh viên |
 
 ---
 
-## PHẦN 4. NỘI DUNG TỆP README.MD CHO REPOSITORY GITHUB
+## 2. Cách dựng môi trường
 
-```markdown
-# LAB 3: NHẬN DIỆN VÀ ỨNG PHÓ CÁC MỐI ĐE DỌA ĐẾN AN TOÀN THÔNG TIN
+1. **Cài Nmap trên Kali** (nếu chưa có), sau đó kiểm tra phiên bản:
+   ```bash
+   sudo apt update
+   sudo apt install nmap
+   nmap --version
+   ```
+2. **Tạo mạng Host-Only** cho hai VM (Kali và Metasploitable 2) cùng nằm trong dải `192.168.56.0/24`. Metasploitable 2 chỉ dùng Host-Only, **không** Bridged, để không lộ máy có lỗ hổng ra mạng thật. Kali chỉ bật NAT tạm thời khi cần cập nhật gói, phải ngắt trước khi quét.
+3. **Lấy IP từng máy:**
+   ```bash
+   ip -br addr        # trên Kali
+   ifconfig           # trên Metasploitable 2 (user msfadmin)
+   ```
+4. **Kiểm tra kết nối trước khi quét:**
+   ```bash
+   ping -c 4 192.168.56.129
+   ```
+5. **Snapshot** cả hai VM trước khi thực hành (khuyến nghị đặt tên `Before-LAB4`).
+6. Chạy các lệnh quét theo mục 3. Các lệnh quét gói thô (`-sS`, `-sF`, `-sX`, `-sN`, `-sU`, `-O`, `-A`) cần `sudo`.
 
-- **Sinh viên thực hiện:** LÊ TRUNG KIÊN
-- **MSSV:** 1150080060
-- **Lớp:** 11_ĐH_CNPM1
-- **Môn:** Thực hành An toàn và Bảo mật Hệ thống Thông tin
+---
 
-## 1. Thông số môi trường
-- Hệ điều hành máy ảo: Windows 10 Pro 64-bit (Build 19045.3803)
-- Phần mềm ảo hóa: VMware Workstation Pro (Host-only Network)
-- Các công cụ sử dụng: Python 3.14.7, Wireshark 4.6.8, Sysmon 15.22, Autoruns 14.3, Process Explorer 17.14
+## 3. Các tình huống đã thực hiện và kết quả PASS/FAIL
 
-## 2. Các tình huống thực hiện
-- TH0 & TH1: Baseline hệ thống và lập bảng Risk Register phân loại nguy cơ.
-- TH2: Thử nghiệm mã độc EICAR và cơ chế cách ly của Defender.
-- TH3: Kiểm toán sự kiện đăng nhập Event ID 4624/4625 và đổi mật khẩu an toàn.
-- TH4: Thiết lập persistence qua Registry Run, Scheduled Task và kiểm tra tiến trình cổng 8080.
-- TH5: Phân tích bắt gói tin Wireshark so sánh HTTP bản rõ và HTTPS mã hóa.
-- TH6: Mô phỏng DoS localhost, phân tích dữ liệu DDoS và log mail bombing.
-- TH7: Phân tích mẫu email Phishing và phân loại 6 trường hợp Social Engineering.
-- TH8: Cleanup môi trường, xác minh phục hồi và băm mã SHA-256 toàn bộ bằng chứng.
+Quy ước: **PASS** = lệnh chạy đúng, có bằng chứng (ảnh) và kết quả đọc hiểu được. **FAIL** = lệnh lỗi hoặc kết quả không đạt. **CHƯA LÀM** = chưa có bằng chứng thực hiện trong bài.
 
-## 3. Lỗi gặp phải và cách xử lý
-- **Lệch đường dẫn giải nén file mẫu:** Xử lý bằng cách chuẩn hóa giải nén vào thư mục `C:\LAB3\lab3_assets`.
-- **Lỗi đường dẫn Autoruns:** Gọi thực thi thông qua tìm kiếm động hoặc đường dẫn trực tiếp của tệp `autorunsc64.exe`.
-- **Xung đột tiến trình khi hash SHA-256:** Áp dụng điều kiện lọc bỏ qua chính file `evidence_sha256.csv` khi đọc thư mục.
+Mục tiêu quét: `192.168.56.129` (Metasploitable 2).
 
-## 4. Cấu trúc thư mục nộp bài
-- `[11_ĐH_CNPM1]-LAB3_1150080060-LeTrungKien.docx`: Báo cáo Word hoàn chỉnh kèm hình ảnh minh chứng.
-- `evidence_sha256.csv`: Bảng mã băm SHA-256 toàn vẹn cho dữ liệu.
-- `README.md`: Hướng dẫn và thông tin thực hiện bài lab.
+| # | Tình huống | Lệnh | Kết quả quan sát | Kết quả |
+|---|---|---|---|---|
+| 1 | Host discovery / quét cổng 445 toàn dải | `sudo nmap -p 445 192.168.56.0/24 -oG smb.txt` | 256 IP, **3 host up** (.128, .129, .254) trong 15,30 s | **PASS** |
+| 2 | TCP Connect scan | `nmap -sT 192.168.56.129` | 23 open, 977 closed (conn-refused), 0 filtered; 4,72 s | **PASS** |
+| 3 | SYN scan | `sudo nmap -sS 192.168.56.129` | 23 open, 977 closed (reset), 0 filtered; 4,83 s | **PASS** |
+| 4 | FIN scan | `sudo nmap -sF 192.168.56.129` | 23 open\|filtered; 6,04 s | **PASS** |
+| 5 | Xmas scan | `sudo nmap -sX 192.168.56.129` | 23 open\|filtered; 6,07 s | **PASS** |
+| 6 | NULL scan | `sudo nmap -sN 192.168.56.129` | 23 open\|filtered; 6,08 s | **PASS** |
+| 7 | ACK scan | `sudo nmap -sA 192.168.56.129` | Chưa có ảnh/kết quả | **CHƯA LÀM** |
+| 8 | UDP scan top 20 cổng | `sudo nmap -sU --top-ports 20 192.168.56.129` | 2 open (53, 137), 3 open\|filtered (68, 69, 138), 15 closed; 22,30 s | **PASS** |
+| 9 | OS detection | `sudo nmap -O 192.168.56.129` | Linux 2.6.9 – 2.6.33; 1 hop; 6,13 s | **PASS** |
+| 10 | Version detection | `sudo nmap -sV -O 192.168.56.129 -oN/-oX …` | Nhận diện phiên bản 23 dịch vụ (vsftpd 2.3.4, OpenSSH 4.7p1, Apache 2.2.8, Samba 3.0.20, MySQL 5.0.51a, UnrealIRCd…); ≈ 58,5 s | **PASS** |
+| 11 | Aggressive scan | `sudo nmap -A 192.168.56.129` | Có version, OS, traceroute, default script; 157,67 s | **PASS** |
+| 12 | NSE `smb-os-discovery` | `sudo nmap -p 445 --script smb-os-discovery 192.168.56.129` | Unix (Samba 3.0.20-Debian), computer name `metasploitable`, domain `localdomain` | **PASS** |
+| 13 | NSE `smb-vuln-ms17-010` | `sudo nmap -p 445 --script smb-vuln-ms17-010 192.168.56.129` | Cổng 445 open, script **không báo VULNERABLE** và không in kết quả | **PASS** (chạy đúng; kết luận: không có dấu hiệu, *không* suy ra là đã vá) |
+| 14 | Xuất normal text | `… -oN ket_qua.txt` | Tạo được `ket_qua.txt`, mở được bằng Mousepad | **PASS** |
+| 15 | Xuất XML | `… -oX ket_qua.xml` | Tạo được `ket_qua.xml`, mở được bằng Firefox | **PASS** |
+| 16 | Xuất grepable + lọc | `-oG smb.txt` rồi `grep "445/open" smb.txt` | Chỉ ra đúng 192.168.56.129 | **PASS** |
+| 17 | Chuyển XML → HTML (lần 1) | `xsltproc ket_qua.xml -O bao_cao.html` | Lỗi `Unknown option -O` | **FAIL** |
+| 18 | Chuyển XML → HTML (sau sửa) | `xsltproc ket_qua.xml -o bao_cao.html` | Tạo được `bao_cao.html`, mở được bằng Firefox | **PASS** |
+| 19 | Before/after hardening (Windows VM) | `-sV` trước và sau khi thay đổi | Chưa có dữ liệu | **CHƯA LÀM** |
+| 20 | NSE trên Windows VM (nếu có) | – | Chưa có dữ liệu | **CHƯA LÀM** |
+| 21 | Bài tập bổ sung (mục 14: quét 65535 cổng, `-D`, `-oA`, bản đồ dịch vụ…) | – | Chưa có dữ liệu | **CHƯA LÀM** |
+
+**Tổng kết:** 16 PASS, 1 FAIL (đã khắc phục ở #18), 4 CHƯA LÀM.
+
+### Phát hiện chính trên Metasploitable 2
+
+- 23 cổng TCP đang mở; nhiều dịch vụ phiên bản cũ và không mã hóa (Telnet, rexec/rlogin/rsh, FTP, VNC, X11).
+- Ba dịch vụ rủi ro nhất: **1524/tcp bindshell** (root shell không xác thực), **21/tcp vsftpd 2.3.4** (bản có backdoor, cho phép anonymous FTP), **6667/tcp UnrealIRCd 3.2.8.1** (bản có backdoor).
+- Samba 3.0.20 (445/tcp) và SMB message signing đang tắt.
+
+---
+
+## 4. Lỗi gặp phải và cách khắc phục
+
+| # | Lỗi / hiện tượng | Nguyên nhân | Cách khắc phục |
+|---|---|---|---|
+| 1 |
+| 2 | Lệnh `grep "445/open" smb.txt` xuất hiện hai lần trong ảnh | Chạy lặp lệnh khi chụp ảnh, không ảnh hưởng kết quả | Không cần khắc phục; kết quả cả hai lần giống nhau |
+| 3 | Bị hỏi `[sudo] password` khi chạy `-sS`, `-sF`, … | Quét bằng gói thô cần quyền root | Dùng `sudo` và nhập mật khẩu; `-sT` thì không cần `sudo` |
+| 4 | Số host up (3) nhiều hơn số VM đang bật (2) | Có thêm 192.168.56.254, là dịch vụ DHCP/mạng ảo của VMware | Đối chiếu MAC (`00:50:56:…`) để xác định đây không phải VM của sinh viên |
+| 5 | FIN/Xmas/NULL chỉ ra `open\|filtered`, không xác định được cổng mở | Cổng mở và cổng bị lọc đều im lặng với gói bất thường | Không ghi `open\|filtered = open`; đối chiếu với `-sT`/`-sS` để xác nhận 23 cổng open |
+| 6 | `smb-vuln-ms17-010` không in ra kết quả | Máy đích chạy Samba trên Linux, lỗ hổng SMBv1 của Windows không áp dụng; script không báo VULNERABLE | Chỉ kết luận "không có dấu hiệu", không suy ra "đã vá"; đề xuất nâng cấp Samba, tắt SMBv1, bật SMB signing |
+| 7 | `-A` chạy rất lâu (157,67 s) | Nmap chạy version detection, OS detection, traceroute và nhiều NSE script | Chấp nhận; dùng `-A` để tổng hợp, còn phân tích chi tiết dùng `-sV`/`-O` riêng lẻ |
+| 8 | UDP scan chậm (22,30 s cho 20 cổng) và có `open\|filtered` | UDP không có bắt tay; Linux giới hạn tốc độ ICMP unreachable | Chỉ quét nhóm cổng phổ biến bằng `--top-ports 20` |
+
+---
+
+## 5. Cấu trúc file nộp
+
+```
+Lab4_11_ĐH_CNPM1_1150080060_LeTrungKien.docx   # Báo cáo kèm ảnh minh chứng
+README.md                                       # File này
+ket_qua.txt / ket_qua.xml / bao_cao.html / smb.txt   # Kết quả xuất từ Nmap (nếu nộp kèm)
+```
+
+## 6. Việc còn thiếu
+
+- Chụp và bổ sung `sudo nmap -sA 192.168.56.129` (ACK scan).
+- Thực hiện before/after hardening trên Windows VM hoặc dịch vụ test, điền bảng so sánh.
+- Bổ sung ảnh `ip -br addr` (Kali), `ifconfig` (Metasploitable 2) và `nmap -sn` nếu giảng viên yêu cầu đúng danh mục 8 ảnh.
+- Làm các bài tập bổ sung mục 14 nếu được yêu cầu.
+- Điền phiên bản Kali, VMware và hệ điều hành máy thật vào mục 1.
