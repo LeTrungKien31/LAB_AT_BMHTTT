@@ -22,8 +22,7 @@ Link video: https://www.youtube.com/watch?v=VjQZrglVmo4
 | Máy đích | Metasploitable 2 (VM `Metasploitable2-Linux`), hostname `metasploitable` | smb-os-discovery |
 | Nền tảng ảo hóa | VMware (MAC `00:0C:29:…` và `00:50:56:…` là OUI của VMware) | Output Nmap |
 | Mạng | Host-Only, dải `192.168.56.0/24` | Lệnh `nmap … 192.168.56.0/24` |
-| Máy thật (host OS) | *(chưa ghi nhận – điền thêm nếu cần)* | – |
-| Phiên bản Kali / VMware | *(chưa ghi nhận – điền thêm nếu cần)* | – |
+
 
 ### Bảng địa chỉ
 
